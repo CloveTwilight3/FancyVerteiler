@@ -4,9 +4,15 @@ branding:
   color: yellow
   icon: upload-cloud
 inputs:
-  my_input:
-    description: "An input parameter"
+  config_path:
+    description: "Path to the JSON configuration file"
     required: true
+  discord_webhook_url:
+    description: "Discord webhook URL for notifications"
+    required: false
+  modrinth_api_key:
+    description: "Modrinth API key for deployment"
+    required: false
 runs:
   using: "docker"
   image: "Dockerfile"
