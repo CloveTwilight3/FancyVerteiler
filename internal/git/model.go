@@ -5,6 +5,6 @@ type GithubEvent struct {
 }
 
 type HeadCommit struct {
-	ID       string `json:"id"`
-	Messagae string `json:"message"`
+	ID      string `json:"id"`
+	Message string `json:"message"`
 }

@@ -42,7 +42,7 @@ func New() *Service {
 
 	return &Service{
 		cachedCommit:  sha,
-		cachedMessage: event.HeadCommit.Messagae,
+		cachedMessage: event.HeadCommit.Message,
 	}
 }
 
