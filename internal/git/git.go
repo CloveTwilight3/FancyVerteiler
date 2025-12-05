@@ -14,6 +14,8 @@ func New() *Service {
 	sha := os.Getenv("GITHUB_SHA")
 	if sha == "" {
 		sha = "unknown"
+	} else {
+		sha = sha[:7]
 	}
 
 	eventPath := os.Getenv("GITHUB_EVENT_PATH")
