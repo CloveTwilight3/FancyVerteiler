@@ -77,7 +77,7 @@ func (s *Service) createVersion(cfg *config.DeploymentConfig) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusCreated {
-		return err
+		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
 	return nil
@@ -110,6 +110,16 @@ func (s *Service) uploadFile(cfg *config.DeploymentConfig) error {
 		return err
 	}
 	reqBody.Header.Set("Authorization", s.apiKey)
+
+	resp, err := s.hc.Do(reqBody)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusCreated {
+		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
 
 	return nil
 }
