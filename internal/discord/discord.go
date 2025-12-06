@@ -8,6 +8,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"path/filepath"
 )
 
 type Service struct {
@@ -69,10 +70,31 @@ func buildDescription(cfg *config.DeploymentConfig) (string, error) {
 
 	desc := fmt.Sprintf("**Version:** %s", ver)
 
+	if cfg.FancySpaces != nil || cfg.Modrinth != nil {
+		channel := chooseFirstNonEmpty(
+			cfg.FancySpaces.Channel,
+			cfg.Modrinth.Channel,
+		)
+		desc += fmt.Sprintf("\n**Channel:** %s", channel)
+	}
+
+	if cfg.FancySpaces != nil {
+		fileName := filepath.Base(cfg.PluginJarPath)
+		desc += fmt.Sprintf("\n**FancySpaces:** https://fancyspaces.net/api/v1/spaces/%s/versions/%s/files/%s", cfg.FancySpaces.SpaceID, ver, fileName)
+	}
+
 	if cfg.Modrinth != nil {
-		desc += fmt.Sprintf("\n**Channel:** %s", cfg.Modrinth.Channel)
 		desc += fmt.Sprintf("\n**Modrinth:** https://modrinth.com/plugin/%s/version/%s", cfg.ProjectName, ver)
 	}
 
 	return desc, nil
+}
+
+func chooseFirstNonEmpty(strings ...string) string {
+	for _, str := range strings {
+		if str != "" {
+			return str
+		}
+	}
+	return ""
 }
