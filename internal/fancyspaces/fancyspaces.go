@@ -53,6 +53,7 @@ func (s *Service) createVersion(cfg *config.DeploymentConfig) error {
 
 	req := CreateVersionReq{
 		Name:                      ver,
+		Platform:                  cfg.FancySpaces.Platform,
 		Channel:                   cfg.FancySpaces.Channel,
 		Changelog:                 cl,
 		SupportedPlatformVersions: cfg.FancySpaces.SupportedVersions,

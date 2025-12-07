@@ -31,6 +31,7 @@ Example config:
   "version_path": "../../../../plugins/fancynpcs/VERSION",
   "fancyspaces": {
     "space_id": "fancyinnovations/fancynpcs",
+    "platform": "minecraft_plugin",
     "channel": "release",
     "supported_versions": [ "1.21.10", "1.21.11" ]
   },
