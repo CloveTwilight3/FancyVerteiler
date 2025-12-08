@@ -48,3 +48,28 @@ Example config:
   }
 }
 ```
+
+Full example with git integration:
+```yml
+      - name: Get last commit SHA and message
+        id: last_commit
+        run: |
+          {
+            echo "commit_sha=$(git rev-parse --short HEAD)"
+            echo "commit_msg<<EOF"
+            git log -1 --pretty=%B
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Deploy
+        uses: fancyinnovations/fancyverteiler@main
+        with:
+          config_path: "/plugins/fancynpcs/release_deployment_config.json"
+          commit_sha: ${{ steps.last_commit.outputs.commit_sha }}
+          commit_message: ${{ steps.last_commit.outputs.commit_msg }}
+          modrinth_api_key: ${{ secrets.MODRINTH_API_KEY }}
+          discord_webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+```
+
+This will replace `%COMMIT_HASH%` and `%COMMIT_MESSAGE%` in the changelog with the actual commit hash and message.
