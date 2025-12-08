@@ -2,6 +2,15 @@
 
 This action allows you to push version updates of Minecraft or Hytale plugins to multiple platforms at once.
 
+## Features
+
+Publish your plugin to:
+- [FancySpaces](https://fancyspaces.net/)
+- [Modrinth](https://modrinth.com/)
+- [Modtale](https://modtale.net/)
+
+Send notifications to a Discord channel via webhook.
+
 ## Usage
 
 Include the following in your GitHub Actions workflow:
@@ -9,6 +18,8 @@ Include the following in your GitHub Actions workflow:
 - uses: fancyinnovations/fancyverteiler@main
   with:
     config_path: "plugins/fancynpcs/release_deployment_config.json"
+    commit_sha: "see example for git integration below"
+    commit_message: "see example for git integration below"
     fancyspaces_api_key: ${{ secrets.FANCYSPACES_API_KEY }}
     modrinth_api_key: ${{ secrets.MODRINTH_API_KEY }}
     modtale_api_key: ${{ secrets.MODTALE_API_KEY }}
@@ -17,6 +28,8 @@ Include the following in your GitHub Actions workflow:
 
 Inputs:
 - `config_path` (required): Path to the JSON configuration file for FancyVerteiler.
+- `commit_sha` (optional): The commit SHA to replace in the changelog.
+- `commit_message` (optional): The commit message to replace in the changelog.
 - `fancyspaces_api_key` is only required if you want to publish to FancySpaces.
 - `modrinth_api_key` is only required if you want to publish to Modrinth.
 - `modtale_api_key` is only required if you want to publish to Modtale.
