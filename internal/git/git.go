@@ -24,6 +24,12 @@ func New() *Service {
 func (s *Service) Setup() error {
 	workspace := os.Getenv("GITHUB_WORKSPACE")
 	githubactions.Infof("Workspace detected at %s", workspace)
+	dir, err := os.ReadDir(workspace)
+	if err != nil {
+		return err
+	}
+
+	githubactions.Infof("Workspace contents: %#v", dir)
 
 	sha, err := fetchLatestCommitSHA()
 	if err != nil {
