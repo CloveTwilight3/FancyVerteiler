@@ -2,8 +2,11 @@ package git
 
 import (
 	"bytes"
+	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/sethvargo/go-githubactions"
 )
 
 type Service struct {
@@ -19,6 +22,9 @@ func New() *Service {
 }
 
 func (s *Service) Setup() error {
+	workspace := os.Getenv("GITHUB_WORKSPACE")
+	githubactions.Infof("Workspace detected at %s", workspace)
+
 	sha, err := fetchLatestCommitSHA()
 	if err != nil {
 		return err
@@ -45,6 +51,7 @@ func (s *Service) CommitMessage() string {
 
 func fetchLatestCommitSHA() (string, error) {
 	cmd := exec.Command("git", "rev-parse", "--short", "HEAD")
+	cmd.Dir = os.Getenv("GITHUB_WORKSPACE")
 
 	var out bytes.Buffer
 	cmd.Stdout = &out
@@ -59,6 +66,7 @@ func fetchLatestCommitSHA() (string, error) {
 
 func fetchLatestCommitMessage() (string, error) {
 	cmd := exec.Command("git", "log", "-1", "--pretty=%B")
+	cmd.Dir = os.Getenv("GITHUB_WORKSPACE")
 
 	var out bytes.Buffer
 	cmd.Stdout = &out

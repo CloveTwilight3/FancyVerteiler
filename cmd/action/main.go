@@ -7,19 +7,11 @@ import (
 	"FancyVerteiler/internal/git"
 	"FancyVerteiler/internal/modrinth"
 	"FancyVerteiler/internal/modtale"
-	"os"
 
 	"github.com/sethvargo/go-githubactions"
 )
 
 func main() {
-	if len(os.Args) > 1 {
-		err := os.Chdir(os.Args[1])
-		if err != nil {
-			githubactions.Fatalf("failed to change directory: %v", err)
-		}
-	}
-
 	configPath := githubactions.GetInput("config_path")
 	if configPath == "" {
 		githubactions.Fatalf("missing input 'config_path'")
