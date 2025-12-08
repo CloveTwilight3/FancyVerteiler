@@ -71,10 +71,13 @@ func buildDescription(cfg *config.DeploymentConfig) (string, error) {
 	desc := fmt.Sprintf("**Version:** %s", ver)
 
 	if cfg.FancySpaces != nil || cfg.Modrinth != nil {
-		channel := chooseFirstNonEmpty(
-			cfg.FancySpaces.Channel,
-			cfg.Modrinth.Channel,
-		)
+		var channel string
+		if cfg.FancySpaces != nil {
+			channel = cfg.FancySpaces.Channel
+		} else if cfg.Modrinth != nil {
+			channel = cfg.Modrinth.Channel
+		}
+
 		desc += fmt.Sprintf("\n**Channel:** %s", channel)
 	}
 
@@ -88,13 +91,4 @@ func buildDescription(cfg *config.DeploymentConfig) (string, error) {
 	}
 
 	return desc, nil
-}
-
-func chooseFirstNonEmpty(strings ...string) string {
-	for _, str := range strings {
-		if str != "" {
-			return str
-		}
-	}
-	return ""
 }
