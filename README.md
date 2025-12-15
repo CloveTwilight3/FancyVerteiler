@@ -4,9 +4,12 @@ This action allows you to push version updates of Minecraft or Hytale plugins to
 
 ## Features
 
-Publish your plugin to:
+Supported Minecraft plugin platforms:
 - [FancySpaces](https://fancyspaces.net/)
 - [Modrinth](https://modrinth.com/)
+
+Supported Hytale plugin platforms:
+- [FancySpaces](https://fancyspaces.net/)
 - [Orbis](https://orbis.place/)
 - [Modtale](https://modtale.net/)
 
