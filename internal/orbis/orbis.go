@@ -34,9 +34,15 @@ func (s *Service) Deploy(cfg *config.DeploymentConfig) error {
 		return fmt.Errorf("failed to create version: %w", err)
 	}
 
-	if err := s.uploadFile(cfg, versionID); err != nil {
+	versionFileID, err := s.uploadFile(cfg, versionID)
+	if err != nil {
 		return fmt.Errorf("failed to upload file: %w", err)
 	}
+
+	if err := s.setPrimaryVersionFile(cfg, versionFileID); err != nil {
+		return fmt.Errorf("failed to set primary file: %w", err)
+	}
+
 	return nil
 }
 
@@ -54,11 +60,10 @@ func (s *Service) createVersion(cfg *config.DeploymentConfig) (string, error) {
 	cl = strings.ReplaceAll(cl, "%COMMIT_MESSAGE%", s.git.CommitMessage())
 
 	req := CreateVersionReq{
-		VersionNumber:      ver,
-		Name:               ver,
-		Channel:            cfg.Orbis.Channel,
-		CompatibleVersions: cfg.Orbis.SupportedVersions,
-		Changelog:          cl,
+		Version:          ver,
+		Changelog:        cl,
+		HytaleVersionIDs: cfg.Orbis.HytaleVersionIDs,
+		IsPreRelease:     cfg.Orbis.IsPreRelease,
 	}
 
 	data, err := json.Marshal(req)
@@ -71,7 +76,7 @@ func (s *Service) createVersion(cfg *config.DeploymentConfig) (string, error) {
 		return "", err
 	}
 	reqBody.Header.Set("Content-Type", "application/json")
-	reqBody.Header.Set("Authorization", "Bearer "+s.apiKey)
+	reqBody.Header.Set("x-api-key", s.apiKey)
 	reqBody.Header.Set("User-Agent", "FancyVerteiler (https://github.com/FancyInnovations/FancyVerteiler)")
 
 	resp, err := s.hc.Do(reqBody)
@@ -92,57 +97,99 @@ func (s *Service) createVersion(cfg *config.DeploymentConfig) (string, error) {
 	return respVer.ID, nil
 }
 
-func (s *Service) uploadFile(cfg *config.DeploymentConfig, versionID string) error {
+func (s *Service) uploadFile(cfg *config.DeploymentConfig, versionID string) (string, error) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
 	ver, err := cfg.Version()
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	pluginJarPath := config.BasePath + cfg.PluginJarPath
 	pluginJarPath = strings.ReplaceAll(pluginJarPath, "%VERSION%", ver)
 	file, err := os.Open(pluginJarPath)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer file.Close()
 
 	fileWriter, err := writer.CreateFormFile("file", filepath.Base(pluginJarPath))
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	_, err = io.Copy(fileWriter, file)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// Close the writer to finalize the multipart form
 	err = writer.Close()
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	req, err := http.NewRequest("POST", "https://api.orbis.place.net/resources/"+cfg.Orbis.ResourceID+"/versions/"+versionID+"/files", body)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// Set the correct Content-Type with boundary
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-	req.Header.Set("Authorization", "Bearer "+s.apiKey)
+	req.Header.Set("x-api-key", s.apiKey)
+	req.Header.Set("User-Agent", "FancyVerteiler (https://github.com/FancyInnovations/FancyVerteiler)")
 
 	resp, err := s.hc.Do(req)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		respBody, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("failed to create version: %s", string(respBody))
+		return "", fmt.Errorf("failed to create version: %s", string(respBody))
+	}
+
+	var respVerFile VersionFile
+	if err := json.NewDecoder(resp.Body).Decode(&respVerFile); err != nil {
+		return "", err
+	}
+
+	return respVerFile.ID, nil
+}
+
+func (s *Service) setPrimaryVersionFile(cfg *config.DeploymentConfig, fileId string) error {
+	ver, err := cfg.Version()
+	if err != nil {
+		return err
+	}
+
+	req := SetPrimaryFileReq{
+		FileID: fileId,
+	}
+
+	data, err := json.Marshal(req)
+	if err != nil {
+		return err
+	}
+
+	reqBody, err := http.NewRequest("POST", "https://api.orbis.place.net/resources/"+cfg.Orbis.ResourceID+"/versions/"+ver+"/files/primary", strings.NewReader(string(data)))
+	if err != nil {
+		return err
+	}
+	reqBody.Header.Set("Content-Type", "application/json")
+	reqBody.Header.Set("x-api-key", s.apiKey)
+	reqBody.Header.Set("User-Agent", "FancyVerteiler (https://github.com/FancyInnovations/FancyVerteiler)")
+
+	resp, err := s.hc.Do(reqBody)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusCreated {
+		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
 	return nil

@@ -43,9 +43,9 @@ type Modrinth struct {
 }
 
 type Orbis struct {
-	ResourceID        string   `json:"resource_id"`
-	Channel           string   `json:"channel"`
-	SupportedVersions []string `json:"supported_versions"`
+	ResourceID       string   `json:"resource_id"`
+	IsPreRelease     bool     `json:"is_pre_release"`
+	HytaleVersionIDs []string `json:"hytale_version_ids"`
 }
 
 type Modtale struct {

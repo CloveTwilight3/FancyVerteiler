@@ -75,8 +75,8 @@ Example config:
   },
   "orbis": {
     "resource_id": "1234",
-    "channel": "RELEASE",
-    "supported_versions": [ "2026.12.02.12312313" ]
+    "is_pre_release": false,
+    "hytale_version_ids": [ "2026.12.02.12312313" ]
   },
   "modtale": {
     "project_id": "abcdef123456",
