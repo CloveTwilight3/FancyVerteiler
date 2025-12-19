@@ -72,7 +72,7 @@ func (s *Service) Deploy(cfg *config.DeploymentConfig) error {
 		return err
 	}
 
-	req, err := http.NewRequest("POST", "https://unifiedhytale.com/api/v1/projects/"+cfg.Modtale.ProjectID+"/versions", body)
+	req, err := http.NewRequest("POST", "https://unifiedhytale.com/api/v1/projects/"+cfg.UnifiedHytale.ProjectID+"/versions", body)
 	if err != nil {
 		return err
 	}

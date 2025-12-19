@@ -86,7 +86,12 @@ func (s *Service) createVersion(cfg *config.DeploymentConfig) (string, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusCreated {
-		return "", fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return "", fmt.Errorf("failed to read body: %w", err)
+		}
+
+		return "", fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(body))
 	}
 
 	var respVer Version
@@ -147,8 +152,12 @@ func (s *Service) uploadFile(cfg *config.DeploymentConfig, versionID string) (st
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		respBody, _ := io.ReadAll(resp.Body)
-		return "", fmt.Errorf("failed to create version: %s", string(respBody))
+		respBody, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return "", fmt.Errorf("failed to read body: %w", err)
+		}
+
+		return "", fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(respBody))
 	}
 
 	var respVerFile VersionFile
@@ -189,7 +198,12 @@ func (s *Service) setPrimaryVersionFile(cfg *config.DeploymentConfig, fileId str
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusCreated {
-		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return fmt.Errorf("failed to read body: %w", err)
+		}
+
+		return fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(body))
 	}
 
 	return nil
