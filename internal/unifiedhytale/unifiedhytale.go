@@ -72,14 +72,14 @@ func (s *Service) Deploy(cfg *config.DeploymentConfig) error {
 		return err
 	}
 
-	req, err := http.NewRequest("POST", "https://www.unifiedhytale.com/api/v1/projects/"+cfg.Modtale.ProjectID+"/versions", body)
+	req, err := http.NewRequest("POST", "https://unifiedhytale.com/api/v1/projects/"+cfg.Modtale.ProjectID+"/versions", body)
 	if err != nil {
 		return err
 	}
 
 	// Set the correct Content-Type with boundary
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-	req.Header.Set("Authorization", "Bearer"+s.apiKey)
+	req.Header.Set("Authorization", "Bearer "+s.apiKey)
 	req.Header.Set("User-Agent", "FancyVerteiler (https://github.com/FancyInnovations/FancyVerteiler)")
 
 	resp, err := s.hc.Do(req)
