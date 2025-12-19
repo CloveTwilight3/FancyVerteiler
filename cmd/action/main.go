@@ -43,100 +43,131 @@ func main() {
 	gs := git.New(sha, message)
 
 	if cfg.FancySpaces != nil {
-		apiKey := githubactions.GetInput("fancyspaces_api_key")
-		if apiKey == "" {
-			githubactions.Fatalf("missing input 'fancyspaces_api_key'")
-		}
-
-		githubactions.Infof("Deploying to FancySpaces space: %s", cfg.FancySpaces.SpaceID)
-
-		fs := fancyspaces.New(apiKey, gs)
-		if err := fs.Deploy(cfg); err != nil {
-			githubactions.Fatalf("failed to deploy to FancySpaces: %v", err)
-		}
-		githubactions.Infof("Successfully deployed to FancySpaces space: %s", cfg.FancySpaces.SpaceID)
+		deployToFancySpaces(cfg, gs)
 	}
-
 	if cfg.Modrinth != nil {
-		apiKey := githubactions.GetInput("modrinth_api_key")
-		if apiKey == "" {
-			githubactions.Fatalf("missing input 'modrinth_api_key'")
-		}
-
-		githubactions.Infof("Deploying to Modrinth project: %s", cfg.Modrinth.ProjectID)
-
-		mr := modrinth.New(apiKey, gs)
-		if err := mr.Deploy(cfg); err != nil {
-			githubactions.Fatalf("failed to deploy to Modrinth: %v", err)
-		}
-		githubactions.Infof("Successfully deployed to Modrinth project: %s", cfg.Modrinth.ProjectID)
+		deployToModrinth(cfg, gs)
 	}
-
 	if cfg.Orbis != nil {
-		apiKey := githubactions.GetInput("orbis_api_key")
-		if apiKey == "" {
-			githubactions.Fatalf("missing input 'orbis_api_key'")
-		}
-
-		githubactions.Infof("Deploying to Orbis resource: %s", cfg.Orbis.ResourceID)
-
-		ob := orbis.New(apiKey, gs)
-		if err := ob.Deploy(cfg); err != nil {
-			githubactions.Fatalf("failed to deploy to Orbis: %v", err)
-		}
-		githubactions.Infof("Successfully deployed to Orbis resource: %s", cfg.Orbis.ResourceID)
+		deployToOrbis(cfg, gs)
 	}
-
 	if cfg.Modtale != nil {
-		apiKey := githubactions.GetInput("modtale_api_key")
-		if apiKey == "" {
-			githubactions.Fatalf("missing input 'modtale_api_key'")
-		}
-
-		githubactions.Infof("Deploying to Modtale project: %s", cfg.Modtale.ProjectID)
-
-		mt := modtale.New(apiKey, gs)
-		if err := mt.Deploy(cfg); err != nil {
-			githubactions.Fatalf("failed to deploy to Modtale: %v", err)
-		}
-		githubactions.Infof("Successfully deployed to Modtale project: %s", cfg.Modtale.ProjectID)
+		deployToModtale(cfg, gs)
 	}
-
 	if cfg.CurseForge != nil {
-		apiKey := githubactions.GetInput("curseforge_api_key")
-		if apiKey == "" {
-			githubactions.Fatalf("missing input 'curseforge_api_key'")
-		}
-
-		githubactions.Infof("Deploying to CurseForge project: %s", cfg.CurseForge.ProjectID)
-
-		cf := curseforge.New(apiKey, gs)
-		if err := cf.Deploy(cfg); err != nil {
-			githubactions.Fatalf("failed to deploy to CurseForge: %v", err)
-		}
-		githubactions.Infof("Successfully deployed to CurseForge project: %s", cfg.CurseForge.ProjectID)
+		deployToCurseforge(cfg, gs)
 	}
-
 	if cfg.UnifiedHytale != nil {
-		apiKey := githubactions.GetInput("unifiedhytale_api_key")
-		if apiKey == "" {
-			githubactions.Fatalf("missing input 'unifiedhytale_api_key'")
-		}
-
-		githubactions.Infof("Deploying to Modtale project: %s", cfg.UnifiedHytale.ProjectID)
-
-		mt := unifiedhytale.New(apiKey, gs)
-		if err := mt.Deploy(cfg); err != nil {
-			githubactions.Fatalf("failed to deploy to UnifiedHytale: %v", err)
-		}
-		githubactions.Infof("Successfully deployed to UnifiedHytale project: %s", cfg.UnifiedHytale.ProjectID)
+		deployToUnifiedHytale(cfg, gs)
 	}
 
 	if discWebhookURL != "" {
 		disc := discord.New()
 		if err := disc.SendSuccessMessage(discWebhookURL, cfg); err != nil {
-			githubactions.Fatalf("failed to send Discord success message: %v", err)
+			githubactions.Errorf("Failed to send Discord success message: %v", err)
+		} else {
+			githubactions.Infof("Successfully sent Discord success message")
 		}
-		githubactions.Infof("Successfully sent Discord success message")
 	}
+}
+
+func deployToFancySpaces(cfg *config.DeploymentConfig, gs *git.Service) {
+	apiKey := githubactions.GetInput("fancyspaces_api_key")
+	if apiKey == "" {
+		githubactions.Errorf("Missing input 'fancyspaces_api_key'")
+		return
+	}
+
+	githubactions.Infof("Deploying to FancySpaces space: %s", cfg.FancySpaces.SpaceID)
+
+	fs := fancyspaces.New(apiKey, gs)
+	if err := fs.Deploy(cfg); err != nil {
+		githubactions.Errorf("Failed to deploy to FancySpaces: %v", err)
+	}
+	githubactions.Infof("Successfully deployed to FancySpaces space: %s", cfg.FancySpaces.SpaceID)
+}
+
+func deployToModrinth(cfg *config.DeploymentConfig, gs *git.Service) {
+	apiKey := githubactions.GetInput("modrinth_api_key")
+	if apiKey == "" {
+		githubactions.Errorf("Missing input 'modrinth_api_key'")
+		return
+	}
+
+	githubactions.Infof("Deploying to Modrinth project: %s", cfg.Modrinth.ProjectID)
+
+	mr := modrinth.New(apiKey, gs)
+	if err := mr.Deploy(cfg); err != nil {
+		githubactions.Errorf("Failed to deploy to Modrinth: %v", err)
+		return
+	}
+	githubactions.Infof("Successfully deployed to Modrinth project: %s", cfg.Modrinth.ProjectID)
+}
+
+func deployToOrbis(cfg *config.DeploymentConfig, gs *git.Service) {
+	apiKey := githubactions.GetInput("orbis_api_key")
+	if apiKey == "" {
+		githubactions.Errorf("Missing input 'orbis_api_key'")
+		return
+	}
+
+	githubactions.Infof("Deploying to Orbis resource: %s", cfg.Orbis.ResourceID)
+
+	ob := orbis.New(apiKey, gs)
+	if err := ob.Deploy(cfg); err != nil {
+		githubactions.Errorf("Failed to deploy to Orbis: %v", err)
+		return
+	}
+	githubactions.Infof("Successfully deployed to Orbis resource: %s", cfg.Orbis.ResourceID)
+}
+
+func deployToModtale(cfg *config.DeploymentConfig, gs *git.Service) {
+	apiKey := githubactions.GetInput("modtale_api_key")
+	if apiKey == "" {
+		githubactions.Errorf("Missing input 'modtale_api_key'")
+		return
+	}
+
+	githubactions.Infof("Deploying to Modtale project: %s", cfg.Modtale.ProjectID)
+
+	mt := modtale.New(apiKey, gs)
+	if err := mt.Deploy(cfg); err != nil {
+		githubactions.Errorf("Failed to deploy to Modtale: %v", err)
+		return
+	}
+	githubactions.Infof("Successfully deployed to Modtale project: %s", cfg.Modtale.ProjectID)
+}
+
+func deployToCurseforge(cfg *config.DeploymentConfig, gs *git.Service) {
+	apiKey := githubactions.GetInput("curseforge_api_key")
+	if apiKey == "" {
+		githubactions.Errorf("Missing input 'curseforge_api_key'")
+		return
+	}
+
+	githubactions.Infof("Deploying to CurseForge project: %s", cfg.CurseForge.ProjectID)
+
+	cf := curseforge.New(apiKey, gs)
+	if err := cf.Deploy(cfg); err != nil {
+		githubactions.Errorf("Failed to deploy to CurseForge: %v", err)
+		return
+	}
+	githubactions.Infof("Successfully deployed to CurseForge project: %s", cfg.CurseForge.ProjectID)
+}
+
+func deployToUnifiedHytale(cfg *config.DeploymentConfig, gs *git.Service) {
+	apiKey := githubactions.GetInput("unifiedhytale_api_key")
+	if apiKey == "" {
+		githubactions.Errorf("Missing input 'unifiedhytale_api_key'")
+		return
+	}
+
+	githubactions.Infof("Deploying to Modtale project: %s", cfg.UnifiedHytale.ProjectID)
+
+	mt := unifiedhytale.New(apiKey, gs)
+	if err := mt.Deploy(cfg); err != nil {
+		githubactions.Errorf("Failed to deploy to UnifiedHytale: %v", err)
+		return
+	}
+	githubactions.Infof("Successfully deployed to UnifiedHytale project: %s", cfg.UnifiedHytale.ProjectID)
 }
