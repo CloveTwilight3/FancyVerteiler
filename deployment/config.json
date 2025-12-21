@@ -1,0 +1,12 @@
+{
+  "project_name": "FancyVerteiler",
+  "plugin_jar_path": "/deployment/FancyVerteiler",
+  "changelog_path": "/deployment/CHANGELOG.md",
+  "version_path": "/deployment/VERSION",
+  "fancyspaces": {
+    "space_id": "fv",
+    "platform": "executable",
+    "channel": "release",
+    "supported_versions": [ "linux x86" ]
+  }
+}

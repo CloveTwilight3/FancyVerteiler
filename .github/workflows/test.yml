@@ -1,0 +1,35 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.25.5
+          check-latest: true
+          cache-dependency-path: "**/*.sum"
+
+      - name: Install dependencies
+        run: go mod tidy
+
+      - name: Build
+        run: go build cmd/app/main.go
+
+      - name: Test
+        run: go test ./... -v
+        working-directory: src
