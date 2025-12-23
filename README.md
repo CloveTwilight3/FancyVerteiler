@@ -14,6 +14,7 @@ Supported Hytale plugin platforms:
 - [Orbis](https://orbis.place/)
 - [Modtale](https://modtale.net/)
 - [UnifiedHytale](https://www.unifiedhytale.com)
+- [CurseForge](https://www.curseforge.com/)
 
 Send notifications to a Discord channel via webhook.
 
