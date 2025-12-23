@@ -4,7 +4,7 @@ import "fmt"
 
 // Loader type constants
 const (
-	BukkitLoaderID   = 1     // Bukkit/Spigot/Paper plugins
+	BukkitLoaderID   = 1 // Bukkit/Spigot/Paper plugins
 	FabricLoaderID   = 4
 	ForgeLoaderID    = 1
 	NeoForgeLoaderID = 6
@@ -17,6 +17,7 @@ const (
 	ModVersionType_119 = 73407 // Mod loader versions for 1.19.x
 	ModVersionType_120 = 75125 // Mod loader versions for 1.20.x
 	ModVersionType_121 = 77784 // Mod loader versions for 1.21.x
+	HytaleVersionType  = 56709 // Hytale version type
 )
 
 // pluginVersionToID maps Minecraft version strings to CurseForge game version IDs
@@ -87,11 +88,21 @@ var modVersionToID = map[string]int{
 	"1.21.11": 14406,
 }
 
-// ConvertVersionString converts a Minecraft version string to CurseForge ID
-// projectType should be "plugin" or "mod"
+// hytaleVersionToID maps Hytale version strings to CurseForge game version IDs
+// These IDs are for gameVersionTypeID = 56709 (Hytale versions)
+var hytaleVersionToID = map[string]int{
+	"1.0": 6952,
+}
+
+// ConvertVersionString converts a Minecraft/Hytale version string to CurseForge ID
+// projectType should be "plugin", "mod", or "hytale"
 func ConvertVersionString(version string, projectType string) (int, bool) {
 	if projectType == "mod" {
 		if id, exists := modVersionToID[version]; exists {
+			return id, true
+		}
+	} else if projectType == "hytale" {
+		if id, exists := hytaleVersionToID[version]; exists {
 			return id, true
 		}
 	} else {
@@ -107,6 +118,11 @@ func ConvertVersionString(version string, projectType string) (int, bool) {
 func GetLoaderID(projectType string, loader string) (int, error) {
 	if projectType == "plugin" {
 		return BukkitLoaderID, nil
+	}
+
+	if projectType == "hytale" {
+		// Hytale doesn't use loaders
+		return 0, nil
 	}
 
 	switch loader {

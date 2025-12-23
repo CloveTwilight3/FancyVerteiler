@@ -70,8 +70,14 @@ func (s *Service) Deploy(cfg *config.DeploymentConfig) error {
 		return err
 	}
 
+	// Determine base URL based on project type
+	baseURL := "https://minecraft.curseforge.com"
+	if cfg.CurseForge.Type == "hytale" {
+		baseURL = "https://hytale.curseforge.com"
+	}
+
 	// Create the request
-	url := fmt.Sprintf("https://minecraft.curseforge.com/api/projects/%s/upload-file", cfg.CurseForge.ProjectID)
+	url := fmt.Sprintf("%s/api/projects/%s/upload-file", baseURL, cfg.CurseForge.ProjectID)
 	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
 		return err
@@ -109,10 +115,10 @@ func (s *Service) metadataJson(cfg *config.DeploymentConfig) (string, error) {
 	cl = strings.ReplaceAll(cl, "%COMMIT_HASH%", s.git.CommitSHA())
 	cl = strings.ReplaceAll(cl, "%COMMIT_MESSAGE%", s.git.CommitMessage())
 
-	// Determine project type (default to "plugin" for backward compatibility)
-	projectType := "plugin"
-	if cfg.CurseForge.Type != "" {
-		projectType = cfg.CurseForge.Type
+	// Type is now required
+	projectType := cfg.CurseForge.Type
+	if projectType == "" {
+		return "", fmt.Errorf("type is required (plugin, mod, or hytale)")
 	}
 
 	// Convert game versions (supports both int IDs and string versions)
@@ -128,7 +134,7 @@ func (s *Service) metadataJson(cfg *config.DeploymentConfig) (string, error) {
 			if id, ok := ConvertVersionString(val, projectType); ok {
 				gameVersionIDs = append(gameVersionIDs, id)
 			} else {
-				return "", fmt.Errorf("unknown Minecraft version for %s: %s", projectType, val)
+				return "", fmt.Errorf("unknown version for %s: %s", projectType, val)
 			}
 		default:
 			return "", fmt.Errorf("invalid game version type: %T", v)
@@ -149,6 +155,8 @@ func (s *Service) metadataJson(cfg *config.DeploymentConfig) (string, error) {
 		// Prepend loader ID to game versions array
 		gameVersionIDs = append([]int{loaderID}, gameVersionIDs...)
 	}
+
+	// Hytale doesn't need loader IDs - gameVersionIDs already contains the correct version IDs
 
 	req := CreateVersionReq{
 		Changelog:     cl,

@@ -28,11 +28,10 @@ type DeploymentConfig struct {
 }
 
 type FancySpaces struct {
-	SpaceID           string            `json:"space_id"`
-	Platform          string            `json:"platform"`
-	Channel           string            `json:"channel"`
-	SupportedVersions []string          `json:"supported_versions"`
-	AdditionalFiles   map[string]string `json:"additional_files,omitempty"` // name -> path
+	SpaceID           string   `json:"space_id"`
+	Platform          string   `json:"platform"`
+	Channel           string   `json:"channel"`
+	SupportedVersions []string `json:"supported_versions"`
 }
 
 type Modrinth struct {
@@ -56,10 +55,10 @@ type Modtale struct {
 
 type CurseForge struct {
 	ProjectID    string               `json:"project_id"`
-	GameVersions []interface{}        `json:"game_versions"` // Can be int or string
+	GameVersions []interface{}        `json:"game_versions"`
 	ReleaseType  string               `json:"release_type"`
-	Type         string               `json:"type,omitempty"`   // "plugin" or "mod" (defaults to "plugin")
-	Loader       string               `json:"loader,omitempty"` // "fabric", "forge", "neoforge", "quilt" (required for mods)
+	Type         string               `json:"type"`
+	Loader       string               `json:"loader,omitempty"`
 	Relations    *CurseForgeRelations `json:"relations,omitempty"`
 }
 
